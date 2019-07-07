@@ -1,5 +1,18 @@
+from csv import reader
+import pandas as pd
 import random
+import numpy as np
 
+baseDados = pd.read_csv("C:/Users/natan/OneDrive/Documents/GitHub/trabalhoPerceptron/spambase.txt", header = None).iloc[:,0:57]
+novoSamples = baseDados.head(int(4600 * 0.6))
+amostra = baseDados.tail(int(4600 * 0.4))
+
+baseExit = pd.read_csv("C:/Users/natan/OneDrive/Documents/GitHub/trabalhoPerceptron/spambase.txt", header = None).iloc[:,-1]
+novoExit = baseExit.head(int(4600 * 0.6))
+#gerar matriz
+#listaAprendisagem = list(amostra.itertuples(index=False, name=None))
+#listaTeste = list(teste.itertuples(index=False, name=None))
+#print(novoExit)
 
 class Perceptron:
 
@@ -68,7 +81,7 @@ class Perceptron:
         return 1 if u >= 0 else -1
 
 
-samples = ([
+samples = [
     [-0.6508, 0.1097, 4.0009],
     [-1.4492, 0.8896, 4.4005],
     [2.0850, 0.6876, 12.0710],
@@ -100,16 +113,17 @@ samples = ([
     [2.0149, 0.6192, 10.9263],
     [0.2012, 0.2611, 5.4631]
 
-])
+]
 
 exit = [-1, -1, -1, 1, 1, -1, 1, -1, 1, 1, -1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, 1, 1, 1, 1, -1, -1, 1, -1, 1]
 
 # Inicializa o Perceptron
-network = Perceptron(sample=samples, exit = exit, learn_rate=0.01, epoch_number=1000, bias=-1)
-
+#network = Perceptron(sample=samples, exit = exit, learn_rate=0.01, epoch_number=1000, bias=-1)
+network = Perceptron(sample=novoSamples.values.tolist(), exit = novoExit.values.tolist(), learn_rate=0.01, epoch_number=1000, bias=-1)
 # Chamada ao treinamento
 network.trannig()
-
+#print(type(samples))
+#print(type(novoSamples.values.tolist()))
 while True:
     sample = []
     for i in range(3):
