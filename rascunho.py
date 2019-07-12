@@ -34,17 +34,14 @@ class Perceptron:
 
         epoch_count = 0
 
-        listaDeErros = []
-        listaDeEpocas = []
+        errosGrafico = []
+        epocas = []
         valoresObtidos = []
 
         #Metodo do Gradiente Descendente para ajuste dos pesos do Perceptron
         while True:
-            
             valoresObtidos = []
             erro = False
-            criterioDeParada = False
-
             for i in range(self.number_sample):
                 u = 0
                 for j in range(self.col_sample + 1):
@@ -59,19 +56,10 @@ class Perceptron:
             print('Epoca: \n',epoch_count)
             epoch_count = epoch_count + 1
 
-            quantidadeDeErros = sum((1) for a, b in zip(valoresObtidos, self.exit) if a!=b) #print(quantidadeDeErros)
-            listaDeErros.append(quantidadeDeErros)
-            listaDeEpocas.append(epoch_count -1)
+            erros = sum((1) for a, b in zip(valoresObtidos, self.exit) if a!=b) #print(erros)
+            errosGrafico.append(erros)
+            epocas.append(epoch_count -1)
             
-            if epoch_count > 200:
-                cincoUltimos = listaDeErros[-200 : -1]
-                resultado = [numero for numero in cincoUltimos if numero < listaDeErros[-1]]
-            
-                if len(resultado) == len(cincoUltimos) :
-                    criterioDeParada = True
-                else:
-                    criterioDeParada = False
-
             # Se parada porepocas ou erro
             """
             Essa base de dados possui uma sobreposição espacial dos dados e por isso, o Perceptron não
@@ -80,12 +68,12 @@ class Perceptron:
             Para isso, defna um critério de parada do algoritmo de treinamento que avalie o erro ao longo do
             treinamento e até um momento que ele não mais diminua
             """
-            if erro == False or criterioDeParada == True:
+            if erro == False or epoch_count > 1000:
                 print(('\nEpocas:\n',epoch_count))
                 print('------------------------\n')
                 break
         
-        return(listaDeErros, listaDeEpocas) 
+        return(errosGrafico, epocas) 
 
     def sort(self, sample):
         sample.insert(0, self.bias)
@@ -96,12 +84,12 @@ class Perceptron:
         y = self.sign(u)
 
         if  y == -1:
-            #print(('Sample: ', sample))
-            #print('Classification: non-spam')
+            print(('Sample: ', sample))
+            print('Classification: nospam')
             return 0
         else:
-            #print(('Sample: ', sample))
-            #print('Classification: spam')
+            print(('Sample: ', sample))
+            print('Classification: spam')
             return 1
 
     # Funcao de Ativacao
@@ -132,83 +120,4 @@ resultadoTreinamento = network.trannig()
 # realizando os testes
 resultado = [ network.sort(item) for item in testeSamples ]
 
-#print(resultado)
-
-"""
-while True:
-    sample = []
-    for i in range(3):
-        sample.insert(i, float(input('Valor: ')))
-    network.sort(sample)
-"""
-
-"""Você deverá treinar o seu Perceptron com o conjunto de dados de treinamento e, posteriormente
-testá-lo e avaliar sua performance por meio da matriz de confusão e das medidas de sensibilidade e
-especifcidade, conforma já visto em aulas anteriores."""
-
-def get_confusion_matrix(reais, preditos, labels):
-    """
-    Uma função que retorna a matriz de confusão para uma classificação binária
-        reais (list): lista de valores reais
-        preditos (list): lista de valores preditos pelo modelos
-        labels (list): lista de labels a serem avaliados.
-    """
-
-    if len(labels) > 2:
-        return None
-
-    if len(reais) != len(preditos):
-        return None
-    
-    # considerando a primeira classe como a positiva, e a segunda a negativa
-    true_class = labels[1]
-    false_class = labels[0]
-
-    # valores preditos corretamente
-    vp = 0
-    vn = 0
-    
-    # valores preditos incorretamente
-    fp = 0
-    fn = 0
-    
-    for (indice, v_real) in enumerate(reais):
-        v_predito = preditos[indice]
-
-        # se trata de um valor real da classe positiva
-        if v_real == false_class:
-            vp += 1 if v_predito == v_real else 0
-            fp += 1 if v_predito != v_real else 0
-        else:
-            vn += 1 if v_predito == v_real else 0
-            fn += 1 if v_predito != v_real else 0
-    
-    return np.array(
-        [[ vp, fp ], # valores da classe positiva
-        [ fn, vn ]]  # valores da classe negativa
-    )
-
-valores_reais    = testeExit
-valores_preditos = resultado
-
-matrizConfusao = get_confusion_matrix(reais=valores_reais, preditos=valores_preditos, labels=[1,0])
-
-vp = matrizConfusao.item(0)
-fp = matrizConfusao.item(1)
-fn = matrizConfusao.item(2)
-vn = matrizConfusao.item(3)
-
-precisao = vp / (vp + fp)
-sensibilidade = vp / (vp + fn)
-acuracia = (vp + vn) / (vp + vn + fp + fn)
-especificidade = vn / (vn + fp)
-
-print("precisao = ", precisao)
-print("sensibilidade = ", sensibilidade)
-print("acuracia = ", acuracia)
-print("especificidade = ",especificidade)
-
-""". Plote o gráfco com o histórico do Erro x Tempo (épocas)."""
-
-pl.plot(resultadoTreinamento[1], resultadoTreinamento[0])
-pl.show()
+print(resultado)

@@ -1,8 +1,8 @@
 import numpy as np
 
 # 1 para grávida, 0 para não grávida
-valores_reais    = [1, 0, 1, 0, 0, 0, 1, 0, 1, 0]
-valores_preditos = [1, 0, 0, 1, 0, 0, 1, 1, 1, 0]
+valores_reais    = [1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
+valores_preditos = [1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
 
 def get_confusion_matrix(reais, preditos, labels):
     """
@@ -30,8 +30,9 @@ def get_confusion_matrix(reais, preditos, labels):
         return None
     
     # considerando a primeira classe como a positiva, e a segunda a negativa
-    true_class = labels[0]
-    negative_class = labels[1]
+    
+    negative_class = labels[0]
+    true_class = labels[1]
 
     # valores preditos corretamente
     tp = 0
@@ -45,7 +46,7 @@ def get_confusion_matrix(reais, preditos, labels):
         v_predito = preditos[indice]
 
         # se trata de um valor real da classe positiva
-        if v_real == true_class:
+        if v_real == negative_class:
             tp += 1 if v_predito == v_real else 0
             fp += 1 if v_predito != v_real else 0
         else:
@@ -59,5 +60,27 @@ def get_confusion_matrix(reais, preditos, labels):
         [ fn, tn ]
     ])
 
-get_confusion_matrix(reais=valores_reais, preditos=valores_preditos, labels=[1,0])
+#get_confusion_matrix(reais=valores_reais, preditos=valores_preditos, labels=[1,0])
 # array([[3, 1], [2, 4]])
+
+#precisao = vp/(vp+fp)
+
+matrizConfusao = get_confusion_matrix(reais=valores_reais, preditos=valores_preditos, labels=[1,0])
+
+vp = matrizConfusao.item(0)
+fp = matrizConfusao.item(1)
+fn = matrizConfusao.item(2)
+vn = matrizConfusao.item(3)
+print(vn)
+
+precisao = vp / (vp + fp)
+sensibilidade = vp / (vp + fn)
+acuracia = (vp + vn) / (vp + vn + fp + fn)
+especificidade = vn / (vn + fp)
+erroGradiente = (fp + fn) / (vp + vn + fp + fn)
+
+print("precisao = ", precisao)
+print("sensibilidade = ", sensibilidade)
+print("acuracia = ", acuracia)
+print("especificidade = ",especificidade)
+print("erro = ", erroGradiente)
