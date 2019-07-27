@@ -1,11 +1,12 @@
-#py -m pip install -U pip
-#py -m pip install -U matplotlib
+﻿"""
+Natanael Emilio da Costa
+matricula 16.1.8298
+"""
 
 from csv import reader
 import pandas as pd
 import random
 import numpy as np
-import pylab as pl
 
 class Perceptron:
 
@@ -34,14 +35,17 @@ class Perceptron:
 
         epoch_count = 0
 
-        errosGrafico = []
-        epocas = []
-        valoresObtidos = []
+        listaDeErros = [] # lista de quantidade de Erros na etapa de treinamento
+        listaDeEpocas = [] # lista para armazenar as epocas
+        valoresObtidos = [] # lista respostas obtidas na epoca - usado para calcular o numero de erros
 
         #Metodo do Gradiente Descendente para ajuste dos pesos do Perceptron
         while True:
+            
             valoresObtidos = []
             erro = False
+            criterioDeParada = False
+
             for i in range(self.number_sample):
                 u = 0
                 for j in range(self.col_sample + 1):
@@ -51,16 +55,26 @@ class Perceptron:
                     for j in range(self.col_sample + 1):
                         self.weight[j] = self.weight[j] + self.learn_rate * (self.exit[i] - y) * self.sample[i][j]
                     erro = True
-                valoresObtidos.append(y)
+                valoresObtidos.append(y) # adiciona a resposta à lista de resposta na epoca
 
             print('Epoca: \n',epoch_count)
-            epoch_count = epoch_count + 1
-
-            erros = sum((1) for a, b in zip(valoresObtidos, self.exit) if a!=b) #print(erros)
-            errosGrafico.append(erros)
-            epocas.append(epoch_count -1)
             
-            # Se parada porepocas ou erro
+            listaDeEpocas.append(epoch_count) # armazena a epoca atual no vetor de epocas
+
+            epoch_count = epoch_count + 1 # incrementa o indicador da epoca
+
+            quantidadeDeErros = sum((1) for a, b in zip(valoresObtidos, self.exit) if a!=b) #calcular a quantidade de erros na etapa
+            listaDeErros.append(quantidadeDeErros) # adiciona o numero de erros à lista
+            
+            if epoch_count > 1000: # estabelece uma epoca minima para não quebra a comparação com os ultimos erros
+                nUltimos = listaDeErros[-1000 : -1] # recupera os 199 penultimos erros
+                resultado = [numero for numero in nUltimos if numero < listaDeErros[-1]] # compara o ultimo valor de erros com os 199 valores anteriores
+            
+                if len(resultado) == len(nUltimos) : # caso o ultimo valor de erros seja maior que os outros 199 o tamando das listas será igual
+                    criterioDeParada = True # atribui a condição para parada
+                else:
+                    criterioDeParada = False
+
             """
             Essa base de dados possui uma sobreposição espacial dos dados e por isso, o Perceptron não
             conseguirá separar perfeitamente os dados por meio de uma superfície linear de separação.
@@ -68,12 +82,13 @@ class Perceptron:
             Para isso, defna um critério de parada do algoritmo de treinamento que avalie o erro ao longo do
             treinamento e até um momento que ele não mais diminua
             """
-            if erro == False or epoch_count > 1000:
+            # parada por erro ou criterio de parada(os erros pararam de diminuir pelo menos nos ultimos 200)
+            if erro == False or criterioDeParada == True:
                 print(('\nEpocas:\n',epoch_count))
                 print('------------------------\n')
                 break
         
-        return(errosGrafico, epocas) 
+        return(listaDeErros, listaDeEpocas) # retorna a lista de erros e lista de epocas para montar o grafico
 
     def sort(self, sample):
         sample.insert(0, self.bias)
@@ -84,40 +99,12 @@ class Perceptron:
         y = self.sign(u)
 
         if  y == -1:
-            print(('Sample: ', sample))
-            print('Classification: nospam')
-            return 0
+            #print('Classification: non-spam')
+            return 0 # retorna para montar o matriz de confusão
         else:
-            print(('Sample: ', sample))
-            print('Classification: spam')
-            return 1
+            #print('Classification: spam')
+            return 1 # retorna para montar a matriz de confusão
 
     # Funcao de Ativacao
     def sign(self, u):
         return 1 if u >= 0 else -1
-
-
-"""A base de dados deverá ser dividida em duas: uma para treinamento e uma para teste, na proporção
-de 60% e 40%, respectivamente. Os dados deverão ser escolhidos aleatoriamente para não gerar
-conjuntos de dados viciados ou polarizados. """
-
-df = pd.read_csv("C:/Users/natan/OneDrive/Documents/GitHub/trabalhoPerceptron/spambase.txt", header = None)
-baseAprendisagem = df.sample(frac=0.6, replace=True, random_state=1)
-baseTeste = df.sample(frac=0.4, replace=True, random_state=1)
-
-novoSamples = baseAprendisagem.iloc[:,0:57].values.tolist()
-novoExit = baseAprendisagem.iloc[:,-1].replace(0,-1).values.tolist()
-
-testeSamples = baseTeste.iloc[:,0:57].values.tolist()
-testeExit = baseTeste.iloc[:,-1].values.tolist()
-
-# Inicializa o Perceptron
-network = Perceptron(sample=novoSamples, exit = novoExit, learn_rate=0.01, epoch_number=1000, bias=-1)
-
-# Chamada ao treinamento
-resultadoTreinamento = network.trannig()
-
-# realizando os testes
-resultado = [ network.sort(item) for item in testeSamples ]
-
-print(resultado)
